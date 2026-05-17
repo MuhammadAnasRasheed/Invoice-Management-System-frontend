@@ -17,4 +17,4 @@
 - Search invoices and customers
 
 ## Live Demo
-[Link to deployed frontend]
+https://invoice-manager-henna-nine.vercel.app/
