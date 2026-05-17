@@ -26,7 +26,7 @@ export const CreateInvoice = () => {
   });
 
   useEffect(() => {
-    dispatch(getCustomers());
+    dispatch(getCustomers(''));
   }, [dispatch]);
 
   const calculateSubtotal = () => {
