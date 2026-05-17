@@ -1,5 +1,4 @@
 import API from '../../api/axios';
-import type { User } from '../../types';
 
 export interface LoginData {
   email: string;
@@ -15,7 +14,8 @@ export interface RegisterData {
 export const authAPI = {
   register: async (data: RegisterData) => {
     const response = await API.post('/users/register', data);
-    return response.data.data;
+    const { token, ...userData } = response.data.data;
+    return { user: userData.user, token: null };
   },
   login: async (data: LoginData) => {
     const response = await API.post('/users/login', data);

@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../app/hook';
-import { logout } from '../features/auth/authSlice';
+import { clearAuth } from '../features/auth/authSlice';
 import { HomeIcon, UsersIcon, DocumentTextIcon, PlusCircleIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
 
 export const Navbar = () => {
@@ -9,8 +9,10 @@ export const Navbar = () => {
   const { user } = useAppSelector((state) => state.auth);
 
   const handleLogout = () => {
-    dispatch(logout());
-    navigate('/login');
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    dispatch(clearAuth());
+    navigate('/login', { replace: true });
   };
 
   const navigation = [

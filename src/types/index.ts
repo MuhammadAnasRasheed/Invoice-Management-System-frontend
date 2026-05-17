@@ -59,6 +59,7 @@ export interface AuthState {
 
 export interface CustomerState {
   customers: Customer[];
+  currentCustomer: Customer | null;
   isLoading: boolean;
   isError: boolean;
   message: string;
@@ -67,6 +68,7 @@ export interface CustomerState {
 export interface InvoiceState {
   invoices: Invoice[];
   currentInvoice: Invoice | null;
+  customerInvoices: Invoice[];
   isLoading: boolean;
   isError: boolean;
   message: string;

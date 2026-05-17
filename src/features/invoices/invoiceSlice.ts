@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { invoiceAPI } from './invoiceApi';
 import type { CreateInvoiceData } from './invoiceApi';
-import type { InvoiceState, Invoice } from '../../types';
+import type { InvoiceState } from '../../types';
 
 const initialState: InvoiceState = {
   invoices: [],
@@ -9,15 +9,21 @@ const initialState: InvoiceState = {
   isLoading: false,
   isError: false,
   message: '',
+  customerInvoices:[],
 };
 
 export const getInvoices = createAsyncThunk(
   'invoices/getAll',
-  async (_, { rejectWithValue }) => {
+  async (searchTerm: string = '', { rejectWithValue }) => {
     try {
-      return await invoiceAPI.getAll();
+      return await invoiceAPI.getAll(searchTerm);
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch invoices');
+      const err = error.response?.data;
+      const message = err?.message ||
+        err?.errors?.[0]?.message ||
+        err?.error ||
+        'Failed to fetch invoices';
+      return rejectWithValue(message);
     }
   }
 );
@@ -28,7 +34,25 @@ export const getInvoiceById = createAsyncThunk(
     try {
       return await invoiceAPI.getById(id);
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch invoice');
+      const err = error.response?.data;
+      const message = err?.message ||
+        err?.errors?.[0]?.message ||
+        err?.error ||
+        'Failed to fetch invoice';
+      return rejectWithValue(message);
+    }
+  }
+);
+
+export const getInvoicesByCustomer = createAsyncThunk(
+  'invoices/getByCustomer',
+  async (customerId: string, { rejectWithValue }) => {
+    try {
+      return await invoiceAPI.getByCustomerId(customerId);
+    } catch (error: any) {
+      const err = error.response?.data;
+      const message = err?.message || 'Failed to fetch customer invoices';
+      return rejectWithValue(message);
     }
   }
 );
@@ -39,7 +63,12 @@ export const createInvoice = createAsyncThunk(
     try {
       return await invoiceAPI.create(data);
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to create invoice');
+      const err = error.response?.data;
+      const message = err?.message ||
+        err?.errors?.[0]?.message ||
+        err?.error ||
+        'Failed to create invoice';
+      return rejectWithValue(message);
     }
   }
 );
@@ -50,7 +79,12 @@ export const updateInvoiceStatus = createAsyncThunk(
     try {
       return await invoiceAPI.updateStatus(id, status);
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to update status');
+      const err = error.response?.data;
+      const message = err?.message ||
+        err?.errors?.[0]?.message ||
+        err?.error ||
+        'Failed to update status';
+      return rejectWithValue(message);
     }
   }
 );
@@ -62,7 +96,12 @@ export const deleteInvoice = createAsyncThunk(
       await invoiceAPI.delete(id);
       return id;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to delete invoice');
+      const err = error.response?.data;
+      const message = err?.message ||
+        err?.errors?.[0]?.message ||
+        err?.error ||
+        'Failed to delete invoice';
+      return rejectWithValue(message);
     }
   }
 );
@@ -90,7 +129,12 @@ const invoiceSlice = createSlice({
         state.isError = true;
         state.message = action.payload as string;
       })
-      // Get By Id
+      //Get By customer
+      .addCase(getInvoicesByCustomer.fulfilled, (state, action) => {
+        state.isLoading=false;
+        state.customerInvoices = action.payload;  // Add to state
+      })
+      //Get By Id
       .addCase(getInvoiceById.pending, (state) => {
         state.isLoading = true;
       })

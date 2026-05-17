@@ -2,8 +2,9 @@ import API from '../../api/axios';
 import type { Customer } from '../../types';
 
 export const customerAPI = {
-  getAll: async () => {
-    const response = await API.get('/customers');
+  getAll: async (searchTerm?: string) => {
+    const url = searchTerm ? `/customers?search=${encodeURIComponent(searchTerm)}` : '/customers';
+    const response = await API.get(url);
     return response.data.data;
   },
   getById: async (id: string) => {

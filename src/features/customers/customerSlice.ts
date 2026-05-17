@@ -7,15 +7,37 @@ const initialState: CustomerState = {
   isLoading: false,
   isError: false,
   message: '',
+  currentCustomer: null,
 };
 
 export const getCustomers = createAsyncThunk(
   'customers/getAll',
-  async (_, { rejectWithValue }) => {
+  async (searchTerm: string = '', { rejectWithValue }) => {
     try {
-      return await customerAPI.getAll();
+      return await customerAPI.getAll(searchTerm);
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch customers');
+      const err = error.response?.data;
+      const message = err?.message ||
+        err?.errors?.[0]?.message ||
+        err?.error ||
+        'Failed to fetch customers';
+      return rejectWithValue(message);
+    }
+  }
+);
+
+export const getCustomerById = createAsyncThunk(
+  'customers/getById',
+  async (id: string, { rejectWithValue }) => {
+    try {
+      return await customerAPI.getById(id);
+    } catch (error: any) {
+      const err = error.response?.data;
+      const message = err?.message ||
+        err?.errors?.[0]?.message ||
+        err?.error ||
+        'Failed to fetch customer';
+      return rejectWithValue(message);
     }
   }
 );
@@ -26,7 +48,12 @@ export const createCustomer = createAsyncThunk(
     try {
       return await customerAPI.create(data);
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to create customer');
+      const err = error.response?.data;
+      const message = err?.message ||
+        err?.errors?.[0]?.message ||
+        err?.error ||
+        'Failed to create customer';
+      return rejectWithValue(message);
     }
   }
 );
@@ -37,7 +64,12 @@ export const updateCustomer = createAsyncThunk(
     try {
       return await customerAPI.update(id, data);
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to update customer');
+      const err = error.response?.data;
+      const message = err?.message ||
+        err?.errors?.[0]?.message ||
+        err?.error ||
+        'Failed to update customer';
+      return rejectWithValue(message);
     }
   }
 );
@@ -49,7 +81,12 @@ export const deleteCustomer = createAsyncThunk(
       await customerAPI.delete(id);
       return id;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to delete customer');
+      const err = error.response?.data;
+      const message = err?.message ||
+        err?.errors?.[0]?.message ||
+        err?.error ||
+        'Failed to delete customer';
+      return rejectWithValue(message);
     }
   }
 );
@@ -72,6 +109,11 @@ const customerSlice = createSlice({
         state.isLoading = false;
         state.isError = true;
         state.message = action.payload as string;
+      })
+
+      .addCase(getCustomerById.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.currentCustomer = action.payload;  // ✅ Must set currentCustomer
       })
       // Create
       .addCase(createCustomer.fulfilled, (state, action) => {

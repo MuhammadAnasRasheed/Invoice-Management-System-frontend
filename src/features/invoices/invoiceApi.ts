@@ -1,5 +1,5 @@
 import API from '../../api/axios';
-import type { Invoice } from '../../types';
+
 
 export interface CreateInvoiceData {
   customerId: string;
@@ -12,8 +12,9 @@ export interface CreateInvoiceData {
 }
 
 export const invoiceAPI = {
-  getAll: async () => {
-    const response = await API.get('/invoices');
+  getAll: async (searchTerm?:string) => {
+    const url = searchTerm ? `/invoices?search=${encodeURIComponent(searchTerm)}` : '/invoices';
+    const response = await API.get(url);
     return response.data.data;
   },
   getById: async (id: string) => {
@@ -32,4 +33,8 @@ export const invoiceAPI = {
     const response = await API.delete(`/invoices/${id}`);
     return response.data;
   },
+  getByCustomerId: async (customerId: string) => {
+  const response = await API.get(`/invoices/customer/${customerId}`);
+  return response.data.data;
+},
 };

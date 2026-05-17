@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { authAPI} from './authApi';
 import type {LoginData, RegisterData } from './authApi';
-import type { AuthState, User } from '../../types';
+import type { AuthState} from '../../types';
 
 const initialState: AuthState = {
   user: null,
@@ -16,10 +16,14 @@ export const register = createAsyncThunk(
   async (data: RegisterData, { rejectWithValue }) => {
     try {
       const response = await authAPI.register(data);
-      localStorage.setItem('token', response.token);
       return response;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Registration failed');
+      const err = error.response?.data;
+      const message = err?.message || 
+                      err?.errors?.[0]?.message || 
+                      err?.error || 
+                      'Registration failed';
+      return rejectWithValue(message);
     }
   }
 );
@@ -32,7 +36,12 @@ export const login = createAsyncThunk(
       localStorage.setItem('token', response.token);
       return response;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Login failed');
+      const err = error.response?.data;
+      const message = err?.message || 
+                      err?.errors?.[0]?.message || 
+                      err?.error || 
+                      'Login failed';
+      return rejectWithValue(message);
     }
   }
 );
@@ -44,7 +53,12 @@ export const getMe = createAsyncThunk(
       const user = await authAPI.getMe();
       return user;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to get user');
+      const err = error.response?.data;
+      const message = err?.message || 
+                      err?.errors?.[0]?.message || 
+                      err?.error || 
+                      'Failed to get users';
+      return rejectWithValue(message);
     }
   }
 );
@@ -62,6 +76,14 @@ const authSlice = createSlice({
     clearMessage: (state) => {
       state.message = '';
       state.isError = false;
+    },
+
+    clearAuth: (state) => {
+      state.user = null;
+      state.token = null;
+      state.isLoading = false;
+      state.isError = false;
+      state.message = '';
     },
   },
   extraReducers: (builder) => {
@@ -108,5 +130,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { clearMessage } = authSlice.actions;
+export const { clearMessage,clearAuth } = authSlice.actions;
 export default authSlice.reducer;
