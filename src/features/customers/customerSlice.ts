@@ -28,7 +28,7 @@ export const getCustomers = createAsyncThunk(
 
 export const getCustomerById = createAsyncThunk(
   'customers/getById',
-  async (id: string, { rejectWithValue }) => {
+  async (id: string | number, { rejectWithValue }) => {
     try {
       return await customerAPI.getById(id);
     } catch (error: any) {
@@ -60,7 +60,7 @@ export const createCustomer = createAsyncThunk(
 
 export const updateCustomer = createAsyncThunk(
   'customers/update',
-  async ({ id, data }: { id: string; data: Partial<Customer> }, { rejectWithValue }) => {
+  async ({ id, data }: { id: string | number; data: Partial<Customer> }, { rejectWithValue }) => {
     try {
       return await customerAPI.update(id, data);
     } catch (error: any) {
@@ -76,7 +76,7 @@ export const updateCustomer = createAsyncThunk(
 
 export const deleteCustomer = createAsyncThunk(
   'customers/delete',
-  async (id: string, { rejectWithValue }) => {
+  async (id: string | number, { rejectWithValue }) => {
     try {
       await customerAPI.delete(id);
       return id;
@@ -113,7 +113,7 @@ const customerSlice = createSlice({
 
       .addCase(getCustomerById.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.currentCustomer = action.payload;  // ✅ Must set currentCustomer
+        state.currentCustomer = action.payload;
       })
       // Create
       .addCase(createCustomer.fulfilled, (state, action) => {
@@ -121,14 +121,14 @@ const customerSlice = createSlice({
       })
       // Update
       .addCase(updateCustomer.fulfilled, (state, action) => {
-        const index = state.customers.findIndex(c => c.id === action.payload.id);
+        const index = state.customers.findIndex(c => String(c.id) === String(action.payload.id));
         if (index !== -1) {
           state.customers[index] = action.payload;
         }
       })
       // Delete
       .addCase(deleteCustomer.fulfilled, (state, action) => {
-        state.customers = state.customers.filter(c => c.id !== action.payload);
+        state.customers = state.customers.filter(c => String(c.id) !== String(action.payload));
       });
   },
 });

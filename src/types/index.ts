@@ -1,5 +1,5 @@
 export interface User {
-  id: string;
+  id: number | string;
   name: string;
   email: string;
   createdAt: string;
@@ -7,7 +7,7 @@ export interface User {
 }
 
 export interface Customer {
-  id: string;
+  id: number | string;
   name: string;
   email: string;
   phone: string;
@@ -18,7 +18,7 @@ export interface Customer {
 }
 
 export interface InvoiceItem {
-  id: string;
+  id: number | string;
   description: string;
   quantity: number;
   unitPrice: number;
@@ -33,7 +33,7 @@ export type InvoiceStatus =
   | 'cancelled';
 
 export interface Invoice {
-  id: string;
+  id: number | string;
   invoiceNumber: string;
   customer: Customer;
   issueDate: string;

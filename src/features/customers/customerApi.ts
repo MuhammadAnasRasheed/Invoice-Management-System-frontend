@@ -7,7 +7,7 @@ export const customerAPI = {
     const response = await API.get(url);
     return response.data.data;
   },
-  getById: async (id: string) => {
+  getById: async (id: string | number) => {
     const response = await API.get(`/customers/${id}`);
     return response.data.data;
   },
@@ -15,11 +15,11 @@ export const customerAPI = {
     const response = await API.post('/customers', data);
     return response.data.data;
   },
-  update: async (id: string, data: Partial<Customer>) => {
+  update: async (id: string | number, data: Partial<Customer>) => {
     const response = await API.put(`/customers/${id}`, data);
     return response.data.data;
   },
-  delete: async (id: string) => {
+  delete: async (id: string | number) => {
     const response = await API.delete(`/customers/${id}`);
     return response.data;
   },

@@ -25,13 +25,13 @@ export const Invoices = () => {
     return () => clearTimeout(timer);
   }, [dispatch, searchTerm]);
 
-  const handleStatusChange = async (id: string, status: InvoiceStatus) => {
+  const handleStatusChange = async (id: string | number, status: InvoiceStatus) => {
     await dispatch(updateInvoiceStatus({ id, status }));
     toast.success('Status updated successfully');
     dispatch(getInvoices(searchTerm||''));
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: string | number) => {
     if (window.confirm('Are you sure you want to delete this invoice?')) {
       await dispatch(deleteInvoice(id));
       toast.success('Invoice deleted successfully');

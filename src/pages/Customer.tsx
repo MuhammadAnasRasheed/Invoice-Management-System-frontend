@@ -58,7 +58,7 @@ export const Customers = () => {
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: string | number) => {
     if (window.confirm('Are you sure you want to delete this customer?')) {
       await dispatch(deleteCustomer(id));
       toast.success('Customer deleted successfully');

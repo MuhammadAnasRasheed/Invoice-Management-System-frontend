@@ -9,7 +9,7 @@ const initialState: InvoiceState = {
   isLoading: false,
   isError: false,
   message: '',
-  customerInvoices:[],
+  customerInvoices: [],
 };
 
 export const getInvoices = createAsyncThunk(
@@ -30,7 +30,7 @@ export const getInvoices = createAsyncThunk(
 
 export const getInvoiceById = createAsyncThunk(
   'invoices/getById',
-  async (id: string, { rejectWithValue }) => {
+  async (id: string | number, { rejectWithValue }) => {
     try {
       return await invoiceAPI.getById(id);
     } catch (error: any) {
@@ -46,7 +46,7 @@ export const getInvoiceById = createAsyncThunk(
 
 export const getInvoicesByCustomer = createAsyncThunk(
   'invoices/getByCustomer',
-  async (customerId: string, { rejectWithValue }) => {
+  async (customerId: string | number, { rejectWithValue }) => {
     try {
       return await invoiceAPI.getByCustomerId(customerId);
     } catch (error: any) {
@@ -75,7 +75,7 @@ export const createInvoice = createAsyncThunk(
 
 export const updateInvoiceStatus = createAsyncThunk(
   'invoices/updateStatus',
-  async ({ id, status }: { id: string; status: string }, { rejectWithValue }) => {
+  async ({ id, status }: { id: string | number; status: string }, { rejectWithValue }) => {
     try {
       return await invoiceAPI.updateStatus(id, status);
     } catch (error: any) {
@@ -91,7 +91,7 @@ export const updateInvoiceStatus = createAsyncThunk(
 
 export const deleteInvoice = createAsyncThunk(
   'invoices/delete',
-  async (id: string, { rejectWithValue }) => {
+  async (id: string | number, { rejectWithValue }) => {
     try {
       await invoiceAPI.delete(id);
       return id;
@@ -129,12 +129,12 @@ const invoiceSlice = createSlice({
         state.isError = true;
         state.message = action.payload as string;
       })
-      //Get By customer
+      // Get By customer
       .addCase(getInvoicesByCustomer.fulfilled, (state, action) => {
-        state.isLoading=false;
-        state.customerInvoices = action.payload;  // Add to state
+        state.isLoading = false;
+        state.customerInvoices = action.payload;
       })
-      //Get By Id
+      // Get By Id
       .addCase(getInvoiceById.pending, (state) => {
         state.isLoading = true;
       })
@@ -153,17 +153,17 @@ const invoiceSlice = createSlice({
       })
       // Update Status
       .addCase(updateInvoiceStatus.fulfilled, (state, action) => {
-        const index = state.invoices.findIndex(i => i.id === action.payload.id);
+        const index = state.invoices.findIndex(i => String(i.id) === String(action.payload.id));
         if (index !== -1) {
           state.invoices[index] = action.payload;
         }
-        if (state.currentInvoice?.id === action.payload.id) {
+        if (state.currentInvoice && String(state.currentInvoice.id) === String(action.payload.id)) {
           state.currentInvoice = action.payload;
         }
       })
       // Delete
       .addCase(deleteInvoice.fulfilled, (state, action) => {
-        state.invoices = state.invoices.filter(i => i.id !== action.payload);
+        state.invoices = state.invoices.filter(i => String(i.id) !== String(action.payload));
       });
   },
 });
