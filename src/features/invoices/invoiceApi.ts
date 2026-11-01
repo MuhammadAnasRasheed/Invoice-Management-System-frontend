@@ -2,6 +2,7 @@ import API from '../../api/axios';
 
 export interface CreateInvoiceData {
   customerId: string | number;
+  shopId?: string | number;
   items: Array<{ description: string; quantity: number; unitPrice: number }>;
   issueDate: string;
   dueDate: string;

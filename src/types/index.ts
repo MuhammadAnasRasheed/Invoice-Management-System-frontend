@@ -48,6 +48,8 @@ export interface Invoice {
   id: number | string;
   invoiceNumber: string;
   customer: Customer;
+  shop?: Shop | null;
+  shopId?: number | string | null;
   issueDate: string;
   dueDate: string;
   subtotal: number;

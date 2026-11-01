@@ -73,6 +73,7 @@ export const CreateInvoice = () => {
 
     const result = await dispatch(createInvoice({
       customerId: formData.customerId,
+      shopId: selectedShop !== 'all' ? selectedShop : undefined,
       items: items.map(item => ({
         description: item.description,
         quantity: Number(item.quantity),

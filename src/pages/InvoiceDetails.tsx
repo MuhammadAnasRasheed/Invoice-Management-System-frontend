@@ -37,7 +37,7 @@ export const InvoiceDetails = () => {
     return <div className="text-center py-10 text-gray-500">Invoice not found</div>;
   }
 
-  const shop = currentInvoice.customer?.shop;
+  const shop = currentInvoice.shop || currentInvoice.customer?.shop;
 
   return (
     <div>
