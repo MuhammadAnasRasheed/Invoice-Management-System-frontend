@@ -11,8 +11,12 @@ export interface CreateInvoiceData {
 }
 
 export const invoiceAPI = {
-  getAll: async (searchTerm?: string) => {
-    const url = searchTerm ? `/invoices?search=${encodeURIComponent(searchTerm)}` : '/invoices';
+  getAll: async (searchTerm?: string, shopId?: string | number) => {
+    const params = new URLSearchParams();
+    if (searchTerm) params.append('search', searchTerm);
+    if (shopId && shopId !== 'all') params.append('shopId', String(shopId));
+    const queryString = params.toString();
+    const url = queryString ? `/invoices?${queryString}` : '/invoices';
     const response = await API.get(url);
     return response.data.data;
   },

@@ -2,8 +2,12 @@ import API from '../../api/axios';
 import type { Customer } from '../../types';
 
 export const customerAPI = {
-  getAll: async (searchTerm?: string) => {
-    const url = searchTerm ? `/customers?search=${encodeURIComponent(searchTerm)}` : '/customers';
+  getAll: async (searchTerm?: string, shopId?: string | number) => {
+    const params = new URLSearchParams();
+    if (searchTerm) params.append('search', searchTerm);
+    if (shopId && shopId !== 'all') params.append('shopId', String(shopId));
+    const queryString = params.toString();
+    const url = queryString ? `/customers?${queryString}` : '/customers';
     const response = await API.get(url);
     return response.data.data;
   },

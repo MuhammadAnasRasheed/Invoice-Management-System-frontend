@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../app/hook';
 import { createInvoice } from '../features/invoices/invoiceSlice';
 import { getCustomers } from '../features/customers/customerSlice';
+import { getShops } from '../features/shops/shopSlice';
 import toast from 'react-hot-toast';
 
 interface InvoiceItem {
@@ -15,6 +16,8 @@ export const CreateInvoice = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { customers } = useAppSelector((state) => state.customers);
+  const { shops } = useAppSelector((state) => state.shops);
+  const [selectedShop, setSelectedShop] = useState<string>('all');
   const [items, setItems] = useState<InvoiceItem[]>([{ description: '', quantity: 0, unitPrice: 0 }]);
   const [formData, setFormData] = useState({
     customerId: '',
@@ -26,8 +29,12 @@ export const CreateInvoice = () => {
   });
 
   useEffect(() => {
-    dispatch(getCustomers(''));
+    dispatch(getShops(''));
   }, [dispatch]);
+
+  useEffect(() => {
+    dispatch(getCustomers({ shopId: selectedShop }));
+  }, [dispatch, selectedShop]);
 
   const calculateSubtotal = () => {
     return items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
@@ -94,20 +101,46 @@ export const CreateInvoice = () => {
         <div className="bg-white shadow rounded-lg p-6">
           <h2 className="text-lg font-medium text-gray-900 mb-4">Invoice Details</h2>
           
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div>
+              <label className="block text-sm font-medium text-gray-700">Filter Customers by Shop</label>
+              <select
+                value={selectedShop}
+                onChange={(e) => {
+                  setSelectedShop(e.target.value);
+                  setFormData({ ...formData, customerId: '' });
+                }}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 bg-white"
+              >
+                <option value="all">All Shops</option>
+                {shops.map((shop) => (
+                  <option key={shop.id} value={shop.id}>
+                    {shop.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="sm:col-span-2">
               <label className="block text-sm font-medium text-gray-700">Customer *</label>
               <select
                 value={formData.customerId}
                 onChange={(e) => setFormData({ ...formData, customerId: e.target.value })}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 bg-white"
                 required
               >
                 <option value="">Select Customer</option>
                 {customers.map((customer) => (
-                  <option key={customer.id} value={customer.id}>{customer.name}</option>
+                  <option key={customer.id} value={customer.id}>
+                    {customer.name} {customer.shop ? `(${customer.shop.name})` : '(No Shop)'}
+                  </option>
                 ))}
               </select>
+              {customers.length === 0 && (
+                <p className="text-xs text-amber-600 mt-1">
+                  No customers found for this shop. Create a customer assigned to this shop first.
+                </p>
+              )}
             </div>
 
             <div>

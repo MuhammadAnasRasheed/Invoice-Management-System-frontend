@@ -4,7 +4,7 @@ import { useAppDispatch, useAppSelector } from '../app/hook';
 import { getCustomerById } from '../features/customers/customerSlice';
 import { getInvoicesByCustomer } from '../features/invoices/invoiceSlice';
 import { format } from 'date-fns';
-import { ArrowLeftIcon, UserCircleIcon, PhoneIcon, EnvelopeIcon, MapPinIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftIcon, UserCircleIcon, PhoneIcon, EnvelopeIcon, MapPinIcon, BuildingStorefrontIcon } from '@heroicons/react/24/outline';
 
 export const CustomerDetails = () => {
   const { id } = useParams();
@@ -18,7 +18,6 @@ export const CustomerDetails = () => {
       dispatch(getInvoicesByCustomer(id));
     }
   }, [dispatch, id]);
-
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -49,10 +48,18 @@ export const CustomerDetails = () => {
 
       {/* Customer Profile Card */}
       <div className="bg-white shadow rounded-lg overflow-hidden mb-6">
-        <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+        <div className="px-6 py-4 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
           <div className="flex items-center">
             <UserCircleIcon className="h-12 w-12 text-gray-400 mr-3" />
-            <h1 className="text-2xl font-semibold text-gray-900">{currentCustomer.name}</h1>
+            <div>
+              <h1 className="text-2xl font-semibold text-gray-900">{currentCustomer.name}</h1>
+              {currentCustomer.shop && (
+                <span className="inline-flex items-center text-xs text-indigo-600 font-medium">
+                  <BuildingStorefrontIcon className="h-3.5 w-3.5 mr-1" />
+                  {currentCustomer.shop.name} ({currentCustomer.shop.city})
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
@@ -73,6 +80,17 @@ export const CustomerDetails = () => {
                   <MapPinIcon className="h-5 w-5 text-gray-400 mr-2 mt-0.5" />
                   <span className="text-sm text-gray-900">{currentCustomer.address}</span>
                 </div>
+                {currentCustomer.shop && (
+                  <div className="flex items-start pt-2 border-t mt-2">
+                    <BuildingStorefrontIcon className="h-5 w-5 text-indigo-500 mr-2 mt-0.5" />
+                    <div>
+                      <span className="text-xs text-gray-500 block">Aligned Shop</span>
+                      <span className="text-sm text-indigo-700 font-medium">
+                        {currentCustomer.shop.name} - {currentCustomer.shop.address}, {currentCustomer.shop.city}
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 

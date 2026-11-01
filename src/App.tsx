@@ -10,6 +10,8 @@ import { Invoices } from './pages/Invoices';
 import { CreateInvoice } from './pages/CreateInvoice';
 import { InvoiceDetails } from './pages/InvoiceDetails';
 import { CustomerDetails } from './pages/CustomerDetails';
+import { ShopRegistry } from './pages/ShopRegistry';
+
 function App() {
   return (
     <BrowserRouter>
@@ -20,6 +22,7 @@ function App() {
         <Route element={<PrivateRoute />}>
           <Route element={<Layout />}>
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/shop-registry" element={<ShopRegistry />} />
             <Route path="/customers" element={<Customers />} />
             <Route path="/customers/:id" element={<CustomerDetails />} />
             <Route path="/invoices" element={<Invoices />} />

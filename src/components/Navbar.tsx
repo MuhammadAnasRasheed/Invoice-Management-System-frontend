@@ -1,7 +1,14 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../app/hook';
 import { clearAuth } from '../features/auth/authSlice';
-import { HomeIcon, UsersIcon, DocumentTextIcon, PlusCircleIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
+import {
+  HomeIcon,
+  UsersIcon,
+  DocumentTextIcon,
+  PlusCircleIcon,
+  ArrowRightOnRectangleIcon,
+  BuildingStorefrontIcon,
+} from '@heroicons/react/24/outline';
 
 export const Navbar = () => {
   const dispatch = useAppDispatch();
@@ -17,6 +24,7 @@ export const Navbar = () => {
 
   const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
+    { name: 'Shops', href: '/shop-registry', icon: BuildingStorefrontIcon },
     { name: 'Customers', href: '/customers', icon: UsersIcon },
     { name: 'Invoices', href: '/invoices', icon: DocumentTextIcon },
     { name: 'Create Invoice', href: '/invoices/create', icon: PlusCircleIcon },

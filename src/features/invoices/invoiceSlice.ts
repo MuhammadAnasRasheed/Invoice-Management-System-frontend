@@ -14,9 +14,11 @@ const initialState: InvoiceState = {
 
 export const getInvoices = createAsyncThunk(
   'invoices/getAll',
-  async (searchTerm: string = '', { rejectWithValue }) => {
+  async (args: { search?: string; shopId?: string | number } | string = '', { rejectWithValue }) => {
     try {
-      return await invoiceAPI.getAll(searchTerm);
+      const searchTerm = typeof args === 'string' ? args : args.search;
+      const shopId = typeof args === 'string' ? undefined : args.shopId;
+      return await invoiceAPI.getAll(searchTerm, shopId);
     } catch (error: any) {
       const err = error.response?.data;
       const message = err?.message ||

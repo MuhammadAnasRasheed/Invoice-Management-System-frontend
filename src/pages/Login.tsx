@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../app/hook';
 import { login, clearMessage } from '../features/auth/authSlice';
+import { getShops } from '../features/shops/shopSlice';
 import toast from 'react-hot-toast';
 
 export const Login = () => {
@@ -12,9 +13,15 @@ export const Login = () => {
 
   useEffect(() => {
     if (token) {
-      navigate('/dashboard');
+      dispatch(getShops('')).then((res: any) => {
+        if (res.payload && Array.isArray(res.payload) && res.payload.length > 0) {
+          navigate('/dashboard');
+        } else {
+          navigate('/shop-registry');
+        }
+      });
     }
-  }, [token, navigate]);
+  }, [token, navigate, dispatch]);
 
   useEffect(() => {
     if (isError && message) {
@@ -25,7 +32,16 @@ export const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await dispatch(login(formData));
+    const result = await dispatch(login(formData));
+    if (login.fulfilled.match(result)) {
+      toast.success('Login successful!');
+      const shopsResult = await dispatch(getShops(''));
+      if (getShops.fulfilled.match(shopsResult) && Array.isArray(shopsResult.payload) && shopsResult.payload.length > 0) {
+        navigate('/dashboard');
+      } else {
+        navigate('/shop-registry');
+      }
+    }
   };
 
   return (
