@@ -8,6 +8,8 @@ const initialState: CustomerState = {
   isError: false,
   message: '',
   currentCustomer: null,
+  searchTerm: '',
+  selectedShopId: 'all',
 };
 
 export const getCustomers = createAsyncThunk(
@@ -96,7 +98,14 @@ export const deleteCustomer = createAsyncThunk(
 const customerSlice = createSlice({
   name: 'customers',
   initialState,
-  reducers: {},
+  reducers: {
+    setSearchTerm: (state, action) => {
+      state.searchTerm = action.payload;
+    },
+    setSelectedShopId: (state, action) => {
+      state.selectedShopId = action.payload;
+    },
+  },
   extraReducers: (builder) => {
     builder
       // Get All
@@ -134,5 +143,7 @@ const customerSlice = createSlice({
       });
   },
 });
+
+export const { setSearchTerm, setSelectedShopId } = customerSlice.actions;
 
 export default customerSlice.reducer;

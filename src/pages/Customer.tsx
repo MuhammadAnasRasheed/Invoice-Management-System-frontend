@@ -1,20 +1,19 @@
 import { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../app/hook';
-import { getCustomers, createCustomer, updateCustomer, deleteCustomer } from '../features/customers/customerSlice';
+import { getCustomers, createCustomer, updateCustomer, deleteCustomer, setSearchTerm, setSelectedShopId } from '../features/customers/customerSlice';
 import { getShops } from '../features/shops/shopSlice';
 import type { Customer } from '../types';
 import toast from 'react-hot-toast';
-import { PencilIcon, TrashIcon, PlusIcon, MagnifyingGlassIcon, EyeIcon } from '@heroicons/react/24/outline';
-import { Link } from 'react-router-dom';
+import { PencilIcon, TrashIcon, PlusIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { useNavigate } from 'react-router-dom';
 
 export const Customers = () => {
+  const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const { customers, isLoading } = useAppSelector((state) => state.customers);
+  const { customers, isLoading, searchTerm, selectedShopId } = useAppSelector((state) => state.customers);
   const { shops } = useAppSelector((state) => state.shops);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedShop, setSelectedShop] = useState<string>('all');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -28,12 +27,8 @@ export const Customers = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      dispatch(getCustomers({ search: searchTerm, shopId: selectedShop }));
-    }, 400);
-
-    return () => clearTimeout(timer);
-  }, [dispatch, searchTerm, selectedShop]);
+    dispatch(getCustomers({ search: searchTerm, shopId: selectedShopId }));
+  }, [dispatch, searchTerm, selectedShopId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,7 +42,7 @@ export const Customers = () => {
     setIsModalOpen(false);
     setEditingCustomer(null);
     setFormData({ name: '', email: '', phone: '', address: '', shopId: '' });
-    dispatch(getCustomers({ search: searchTerm, shopId: selectedShop }));
+    dispatch(getCustomers({ search: searchTerm, shopId: selectedShopId }));
   };
 
   const handleEdit = (customer: Customer) => {
@@ -66,13 +61,13 @@ export const Customers = () => {
     if (window.confirm('Are you sure you want to delete this customer?')) {
       await dispatch(deleteCustomer(id));
       toast.success('Customer deleted successfully');
-      dispatch(getCustomers({ search: searchTerm, shopId: selectedShop }));
+      dispatch(getCustomers({ search: searchTerm, shopId: selectedShopId }));
     }
   };
 
   const openAddModal = () => {
     setEditingCustomer(null);
-    const defaultShopId = selectedShop !== 'all' ? selectedShop : shops.length > 0 ? String(shops[0].id) : '';
+    const defaultShopId = selectedShopId !== 'all' ? selectedShopId : shops.length > 0 ? String(shops[0].id) : '';
     setFormData({ name: '', email: '', phone: '', address: '', shopId: defaultShopId });
     setIsModalOpen(true);
   };
@@ -99,28 +94,28 @@ export const Customers = () => {
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
           </div>
-          <input
-            type="text"
-            placeholder="Search customers by name..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-          />
+<input
+                type="text"
+                placeholder="Search customers by name..."
+                value={searchTerm}
+                onChange={(e) => dispatch(setSearchTerm(e.target.value))}
+                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              />
         </div>
-        <div className="w-full sm:w-64">
-          <select
-            value={selectedShop}
-            onChange={(e) => setSelectedShop(e.target.value)}
-            className="block w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-700 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm"
-          >
-            <option value="all">All Shops (Filter)</option>
-            {shops.map((shop) => (
-              <option key={shop.id} value={shop.id}>
-                {shop.name} ({shop.city})
-              </option>
-            ))}
-          </select>
-        </div>
+<div className="w-full sm:w-64">
+            <select
+              value={selectedShopId}
+              onChange={(e) => dispatch(setSelectedShopId(e.target.value))}
+              className="block w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-700 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm"
+            >
+              <option value="all">All Shops (Filter)</option>
+              {shops.map((shop) => (
+                <option key={shop.id} value={shop.id}>
+                  {shop.name} ({shop.city})
+                </option>
+              ))}
+            </select>
+          </div>
       </div>
 
       <div className="mt-4 bg-white shadow rounded-lg overflow-hidden">
@@ -147,11 +142,13 @@ export const Customers = () => {
                 </tr>
               ) : (
                 customers.map((customer) => (
-                  <tr key={customer.id}>
+                  <tr
+                    key={customer.id}
+                    onClick={() => navigate(`/customers/${customer.id}`)}
+                    className="hover:bg-gray-50 cursor-pointer"
+                  >
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      <Link to={`/customers/${customer.id}`} className="hover:text-indigo-600">
-                        {customer.name}
-                      </Link>
+                      <span className="hover:text-indigo-600">{customer.name}</span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {customer.shop ? (
@@ -166,10 +163,7 @@ export const Customers = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{customer.phone}</td>
                     <td className="px-6 py-4 text-sm text-gray-500">{customer.address}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <div className="flex items-center">
-                        <Link to={`/customers/${customer.id}`} className="text-indigo-600 hover:text-indigo-900 mr-3">
-                          <EyeIcon className="h-5 w-5 inline" />
-                        </Link>
+                      <div className="flex items-center" onClick={(e) => e.stopPropagation()}>
                         <button onClick={() => handleEdit(customer)} className="text-indigo-600 hover:text-indigo-900 mr-3">
                           <PencilIcon className="h-5 w-5" />
                         </button>

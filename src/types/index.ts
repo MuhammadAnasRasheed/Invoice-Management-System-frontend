@@ -86,6 +86,8 @@ export interface CustomerState {
   isLoading: boolean;
   isError: boolean;
   message: string;
+  searchTerm: string;
+  selectedShopId: string;
 }
 
 export interface InvoiceState {
