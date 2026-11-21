@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../app/hook';
 import { getInvoices, updateInvoiceStatus, deleteInvoice } from '../features/invoices/invoiceSlice';
 import { getShops } from '../features/shops/shopSlice';
 import { format } from 'date-fns';
 import type { InvoiceStatus } from '../types';
 import toast from 'react-hot-toast';
-import { EyeIcon, TrashIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { TrashIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 
 export const Invoices = () => {
+  const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { invoices, isLoading } = useAppSelector((state) => state.invoices);
   const { shops } = useAppSelector((state) => state.shops);
@@ -131,15 +132,23 @@ export const Invoices = () => {
                 </tr>
               ) : (
                 invoices.map((invoice) => (
-                  <tr key={invoice.id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-indigo-600">
-                      <Link to={`/invoices/${invoice.id}`}>{invoice.invoiceNumber}</Link>
+                  <tr
+                    key={invoice.id}
+                    onClick={() => navigate(`/invoices/${invoice.id}`)}
+                    className="hover:bg-gray-50 cursor-pointer"
+                  >
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      <span className="hover:text-indigo-600">{invoice.invoiceNumber}</span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {invoice.customer?.name}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {invoice.customer?.shop ? (
+                      {invoice.shop ? (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-100">
+                          {invoice.shop.name}
+                        </span>
+                      ) : invoice.customer?.shop ? (
                         <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-100">
                           {invoice.customer.shop.name}
                         </span>
@@ -156,10 +165,10 @@ export const Invoices = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       PKR {Number(invoice.total).toFixed(2)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-6 py-4 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                       <select
                         value={invoice.status}
-                        onChange={(e) => handleStatusChange(invoice.id, e.target.value as InvoiceStatus)}
+                        onChange={(e) => { e.stopPropagation(); handleStatusChange(invoice.id, e.target.value as InvoiceStatus); }}
                         className={`px-2 py-1 text-xs font-semibold rounded-full border-0 ${getStatusColor(invoice.status)}`}
                       >
                         {Object.values(invoiceStatuses).map((status) => (
@@ -167,15 +176,10 @@ export const Invoices = () => {
                         ))}
                       </select>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <div className="flex items-center">
-                        <Link to={`/invoices/${invoice.id}`} className="text-indigo-600 hover:text-indigo-900 mr-3">
-                          <EyeIcon className="h-5 w-5 inline" />
-                        </Link>
-                        <button onClick={() => handleDelete(invoice.id)} className="text-red-600 hover:text-red-900">
-                          <TrashIcon className="h-5 w-5 inline" />
-                        </button>
-                      </div>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500" onClick={(e) => e.stopPropagation()}>
+                      <button onClick={() => handleDelete(invoice.id)} className="text-red-600 hover:text-red-900">
+                        <TrashIcon className="h-5 w-5 inline" />
+                      </button>
                     </td>
                   </tr>
                 ))

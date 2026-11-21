@@ -136,7 +136,11 @@ export const Dashboard = () => {
                       {invoice.customer?.name}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {invoice.customer?.shop ? (
+                      {invoice.shop ? (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-50 text-indigo-700">
+                          {invoice.shop.name}
+                        </span>
+                      ) : invoice.customer?.shop ? (
                         <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-50 text-indigo-700">
                           {invoice.customer.shop.name}
                         </span>
