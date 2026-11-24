@@ -20,7 +20,7 @@ export const CustomerDetails = () => {
     }
   }, [dispatch, id]);
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: any) => {
     switch (status) {
       case 'paid': return 'bg-green-100 text-green-800';
       case 'pending': return 'bg-yellow-100 text-yellow-800';
@@ -40,7 +40,7 @@ export const CustomerDetails = () => {
 
   const totalSpent = customerInvoices.reduce((sum, inv) => sum + Number(inv.total), 0);
   const pendingAmount = customerInvoices
-    .filter(inv => inv.status === 'pending')
+    .filter(inv => inv.status?.name === 'PENDING')
     .reduce((sum, inv) => sum + Number(inv.total), 0);
 
   return (
@@ -155,7 +155,7 @@ export const CustomerDetails = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(invoice.status)}`}>
-                        {invoice.status}
+                        {invoice.status?.label || 'Pending'}
                       </span>
                     </td>
                   </tr>

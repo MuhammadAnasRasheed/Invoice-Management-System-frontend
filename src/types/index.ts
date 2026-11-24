@@ -37,12 +37,22 @@ export interface InvoiceItem {
   total: number;
 }
 
-export type InvoiceStatus =
-  | 'draft'
-  | 'pending'
-  | 'paid'
-  | 'overdue'
-  | 'cancelled';
+export interface InvoiceStatus {
+  id: number | string;
+  name: string;
+  label: string;
+  color: string;
+  isTerminal: boolean;
+  displayOrder?: number;
+}
+
+export interface StatusHistory {
+  id: number | string;
+  fromStatus: InvoiceStatus | null;
+  toStatus: InvoiceStatus;
+  changedBy?: User | null;
+  changedAt: string;
+}
 
 export interface Invoice {
   id: number | string;
@@ -59,6 +69,7 @@ export interface Invoice {
   status: InvoiceStatus;
   notes?: string;
   items: InvoiceItem[];
+  statusHistory?: StatusHistory[];
   createdAt: string;
   updatedAt: string;
 }

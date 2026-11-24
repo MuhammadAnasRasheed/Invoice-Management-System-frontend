@@ -3,7 +3,6 @@ import { useParams } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../app/hook';
 import { getInvoiceById, clearCurrentInvoice } from '../features/invoices/invoiceSlice';
 import { format } from 'date-fns';
-import type { InvoiceStatus } from '../types';
 import { EnvelopeIcon, MapPinIcon, PhoneIcon, BuildingStorefrontIcon, UserCircleIcon } from '@heroicons/react/24/outline';
 
 export const InvoiceDetails = () => {
@@ -20,12 +19,27 @@ export const InvoiceDetails = () => {
     };
   }, [dispatch, id]);
 
-  const getStatusColor = (status: InvoiceStatus) => {
-    switch (status) {
-      case 'paid': return 'bg-green-100 text-green-800';
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'overdue': return 'bg-red-100 text-red-800';
+  const getStatusColor = (status: any) => {
+    const name = status?.name;
+    switch (name) {
+      case 'PAID_IN_TIME': return 'bg-green-100 text-green-800';
+      case 'PAID_LATE': return 'bg-orange-100 text-orange-800';
+      case 'OVERDUE': return 'bg-red-100 text-red-800';
+      case 'REJECTED': return 'bg-gray-100 text-gray-800';
+      case 'PENDING': return 'bg-yellow-100 text-yellow-800';
       default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getStatusLabel = (status: any) => {
+    const name = status?.name;
+    switch (name) {
+      case 'PAID_IN_TIME': return 'Paid (in time)';
+      case 'PAID_LATE': return 'Paid (late)';
+      case 'OVERDUE': return 'Overdue';
+      case 'REJECTED': return 'Reject';
+      case 'PENDING': return 'Pending';
+      default: return name;
     }
   };
 
@@ -63,7 +77,7 @@ export const InvoiceDetails = () => {
         <div className="bg-white shadow rounded-lg p-4">
           <p className="text-xs font-medium text-gray-500 uppercase">Status</p>
           <span className={`inline-block mt-2 px-3 py-1 text-sm font-semibold rounded-full ${getStatusColor(currentInvoice.status)}`}>
-            {currentInvoice.status}
+            {getStatusLabel(currentInvoice.status)}
           </span>
         </div>
       </div>
@@ -170,6 +184,40 @@ export const InvoiceDetails = () => {
           </table>
         </div>
       </div>
+
+      {/* Status History */}
+      {currentInvoice.statusHistory && currentInvoice.statusHistory.length > 0 && (
+        <div className="bg-white shadow rounded-lg overflow-hidden mb-6">
+          <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+            <h2 className="text-lg font-medium text-gray-900">Status History</h2>
+          </div>
+          <ul className="divide-y divide-gray-100">
+            {[...currentInvoice.statusHistory]
+              .sort((a, b) => new Date(b.changedAt).getTime() - new Date(a.changedAt).getTime())
+              .map((h) => (
+                <li key={h.id} className="px-6 py-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    {h.fromStatus ? (
+                      <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(h.fromStatus)}`}>
+                        {getStatusLabel(h.fromStatus)}
+                      </span>
+                    ) : (
+                      <span className="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-600">Created</span>
+                    )}
+                    <span className="text-gray-400">→</span>
+                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(h.toStatus)}`}>
+                      {getStatusLabel(h.toStatus)}
+                    </span>
+                  </div>
+                  <div className="text-right text-xs text-gray-500">
+                    <div>{h.changedBy?.name || 'System'}</div>
+                    <div>{format(new Date(h.changedAt), 'MMM dd, yyyy HH:mm')}</div>
+                  </div>
+                </li>
+              ))}
+          </ul>
+        </div>
+      )}
 
       {/* Notes */}
       {currentInvoice.notes && (

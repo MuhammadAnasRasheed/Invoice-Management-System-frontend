@@ -5,7 +5,6 @@ import { getInvoices } from '../features/invoices/invoiceSlice';
 import { getCustomers } from '../features/customers/customerSlice';
 import { getShops } from '../features/shops/shopSlice';
 import { format } from 'date-fns';
-import type { InvoiceStatus } from '../types';
 import { BuildingStorefrontIcon } from '@heroicons/react/24/outline';
 
 export const Dashboard = () => {
@@ -32,10 +31,10 @@ export const Dashboard = () => {
   const totalInvoices = invoices.length;
   const totalCustomers = customers.length;
   const totalRevenue = invoices
-    .filter((inv) => inv.status === 'paid')
+    .filter((inv) => inv.status?.name === 'PAID_IN_TIME' || inv.status?.name === 'PAID_LATE')
     .reduce((sum, inv) => sum + Number(inv.total || 0), 0);
   const pendingAmount = invoices
-    .filter((inv) => inv.status === 'pending')
+    .filter((inv) => inv.status?.name === 'PENDING' || inv.status?.name === 'OVERDUE')
     .reduce((sum, inv) => sum + Number(inv.total || 0), 0);
 
   const stats = [
@@ -47,12 +46,27 @@ export const Dashboard = () => {
 
   const recentInvoices = invoices.slice(0, 5);
 
-  const getStatusColor = (status: InvoiceStatus) => {
-    switch (status) {
-      case 'paid': return 'bg-green-100 text-green-800';
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'overdue': return 'bg-red-100 text-red-800';
+  const getStatusColor = (status: any) => {
+    const name = status?.name;
+    switch (name) {
+      case 'PAID_IN_TIME': return 'bg-green-100 text-green-800';
+      case 'PAID_LATE': return 'bg-orange-100 text-orange-800';
+      case 'OVERDUE': return 'bg-red-100 text-red-800';
+      case 'REJECTED': return 'bg-gray-100 text-gray-800';
+      case 'PENDING': return 'bg-yellow-100 text-yellow-800';
       default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getStatusLabel = (status: any) => {
+    const name = status?.name;
+    switch (name) {
+      case 'PAID_IN_TIME': return 'Paid (in time)';
+      case 'PAID_LATE': return 'Paid (late)';
+      case 'OVERDUE': return 'Overdue';
+      case 'REJECTED': return 'Reject';
+      case 'PENDING': return 'Pending';
+      default: return name;
     }
   };
 
@@ -156,7 +170,7 @@ export const Dashboard = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(invoice.status)}`}>
-                        {invoice.status}
+                        {getStatusLabel(invoice.status)}
                       </span>
                     </td>
                   </tr>

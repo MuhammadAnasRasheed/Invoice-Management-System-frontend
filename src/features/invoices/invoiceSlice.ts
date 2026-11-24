@@ -77,9 +77,9 @@ export const createInvoice = createAsyncThunk(
 
 export const updateInvoiceStatus = createAsyncThunk(
   'invoices/updateStatus',
-  async ({ id, status }: { id: string | number; status: string }, { rejectWithValue }) => {
+  async ({ id, statusId }: { id: string | number; statusId: string | number }, { rejectWithValue }) => {
     try {
-      return await invoiceAPI.updateStatus(id, status);
+      return await invoiceAPI.updateStatus(id, statusId);
     } catch (error: any) {
       const err = error.response?.data;
       const message = err?.message ||

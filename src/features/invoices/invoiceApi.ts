@@ -29,8 +29,8 @@ export const invoiceAPI = {
     const response = await API.post('/invoices', data);
     return response.data.data;
   },
-  updateStatus: async (id: string | number, status: string) => {
-    const response = await API.patch(`/invoices/${id}/status`, { status });
+  updateStatus: async (id: string | number, statusId: string | number) => {
+    const response = await API.patch(`/invoices/${id}/status`, { statusId });
     return response.data.data;
   },
   delete: async (id: string | number) => {

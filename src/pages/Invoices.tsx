@@ -4,9 +4,9 @@ import { useAppDispatch, useAppSelector } from '../app/hook';
 import { getInvoices, updateInvoiceStatus, deleteInvoice } from '../features/invoices/invoiceSlice';
 import { getShops } from '../features/shops/shopSlice';
 import { format } from 'date-fns';
-import type { InvoiceStatus } from '../types';
 import toast from 'react-hot-toast';
 import { TrashIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { statusAPI, type StatusItem } from '../features/statuses/statusApi';
 
 export const Invoices = () => {
   const navigate = useNavigate();
@@ -15,9 +15,17 @@ export const Invoices = () => {
   const { shops } = useAppSelector((state) => state.shops);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedShop, setSelectedShop] = useState<string>('all');
+  const [transitions, setTransitions] = useState<Record<string, StatusItem[]>>({});
 
   useEffect(() => {
     dispatch(getShops(''));
+    statusAPI.getAll().then((res: any) => {
+      res.forEach((s: StatusItem) => {
+        statusAPI.getTransitions(s.id).then((t: any) => {
+          setTransitions((prev) => ({ ...prev, [String(s.id)]: t }));
+        });
+      });
+    });
   }, [dispatch]);
 
   useEffect(() => {
@@ -28,8 +36,8 @@ export const Invoices = () => {
     return () => clearTimeout(timer);
   }, [dispatch, searchTerm, selectedShop]);
 
-  const handleStatusChange = async (id: string | number, status: InvoiceStatus) => {
-    await dispatch(updateInvoiceStatus({ id, status }));
+  const handleStatusChange = async (id: string | number, statusId: string | number) => {
+    await dispatch(updateInvoiceStatus({ id, statusId }));
     toast.success('Status updated successfully');
     dispatch(getInvoices({ search: searchTerm, shopId: selectedShop }));
   };
@@ -42,24 +50,29 @@ export const Invoices = () => {
     }
   };
 
-  const getStatusColor = (status: InvoiceStatus) => {
-    switch (status) {
-      case 'paid': return 'bg-green-100 text-green-800';
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'overdue': return 'bg-red-100 text-red-800';
-      case 'draft': return 'bg-gray-100 text-gray-800';
-      case 'cancelled': return 'bg-red-100 text-red-800';
+  const getStatusColor = (status: any) => {
+    const name = status?.name;
+    switch (name) {
+      case 'PAID_IN_TIME': return 'bg-green-100 text-green-800';
+      case 'PAID_LATE': return 'bg-orange-100 text-orange-800';
+      case 'OVERDUE': return 'bg-red-100 text-red-800';
+      case 'REJECTED': return 'bg-gray-100 text-gray-800';
+      case 'PENDING': return 'bg-yellow-100 text-yellow-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const invoiceStatuses: InvoiceStatus[] = [
-    'draft',
-    'pending',
-    'paid',
-    'overdue',
-    'cancelled',
-  ];
+  const getStatusLabel = (status: any) => {
+    const name = status?.name;
+    switch (name) {
+      case 'PAID_IN_TIME': return 'Paid (in time)';
+      case 'PAID_LATE': return 'Paid (late)';
+      case 'OVERDUE': return 'Overdue';
+      case 'REJECTED': return 'Reject';
+      case 'PENDING': return 'Pending';
+      default: return name;
+    }
+  };
 
   return (
     <div>
@@ -167,12 +180,14 @@ export const Invoices = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                       <select
-                        value={invoice.status}
-                        onChange={(e) => { e.stopPropagation(); handleStatusChange(invoice.id, e.target.value as InvoiceStatus); }}
+                        value={invoice.status?.id}
+                        onChange={(e) => { e.stopPropagation(); handleStatusChange(invoice.id, e.target.value); }}
+                        disabled={invoice.status?.isTerminal}
                         className={`px-2 py-1 text-xs font-semibold rounded-full border-0 ${getStatusColor(invoice.status)}`}
                       >
-                        {Object.values(invoiceStatuses).map((status) => (
-                          <option key={status} value={status}>{status}</option>
+                        <option value={invoice.status?.id}>{getStatusLabel(invoice.status)}</option>
+                        {(transitions[String(invoice.status?.id)] || []).map((s: StatusItem) => (
+                          <option key={s.id} value={s.id}>{getStatusLabel(s)}</option>
                         ))}
                       </select>
                     </td>
